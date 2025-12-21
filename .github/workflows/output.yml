@@ -66,4 +66,5 @@ jobs:
           vercel-org-id:       ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id:   ${{ secrets.VERCEL_PROJECT_ID }}
           working-directory:   ./public
+          vercel-args: '--prod'
           # 如果站点需要自定义域名，可以再加 vercel-args: '--prod'
