@@ -1,4 +1,4 @@
-baseURL: "https://memo.mcyzsx.top"
+baseURL: "https://m.zsxcoder.top"
 languageCode: "zh-Hans"
 title: "ZSX Moments"
 theme: "moments"
@@ -12,7 +12,7 @@ params:
     signature: "每一段旅行，都有终点~"
     name: "钟神秀"
     quote:
-      text: '这是基于Hugo的<a href="https://github.com/zsxcoder/notion-hugo-moments.git" target="_blank" rel="noopener noreferrer">Moment</a>说说，然后数据来自<strong>Notion</strong>，每<strong>15分钟</strong>更新一次。'
+      text: '这是基于Hugo的<a href="https://github.com/zsxcoder/notion-hugo-moments.git" target="_blank" rel="noopener noreferrer">Moment</a>说说，然后数据来自<strong>Notion</strong>，每<strong>10分钟</strong>更新一次。'
       author: "钟神秀"
     experimental:
       comment: true
