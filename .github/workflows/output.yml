@@ -3,6 +3,9 @@ name: fetch content from Notion & deploy to Vercel
 on:
   workflow_dispatch:          # 手动触发
   push:                       # 每次 push 触发
+  schedule:
+    - cron: '3,13,23,33,43,53 * * * *'   # 每 10 分钟但错开整点
+
 
 env:
   NOTION_SECRET:      ${{ secrets.NOTION_SECRET }}
