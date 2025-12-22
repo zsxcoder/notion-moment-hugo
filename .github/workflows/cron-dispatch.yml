@@ -1,0 +1,17 @@
+name: cron-dispatch
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'   # 每 10 分钟
+  workflow_dispatch:         # 手动按钮，方便调试
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 发送 repository_dispatch 事件
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: auto-rebuild
+          # 如需给主 workflow 传额外数据，可再加 client-payload: '{"xxx": "yyy"}'
