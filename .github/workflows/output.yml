@@ -1,10 +1,13 @@
 name: fetch content from Notion & deploy to Vercel
 
 on:
-  workflow_dispatch:          # 手动触发
-  push:                       # 每次 push 触发
+  workflow_dispatch:
+  push:
   schedule:
-    - cron: '*/10 * * * *'    # 每 10 分钟同步一次
+    - cron: '*/10 * * * *'
+  repository_dispatch:          # ← 只加这一行
+    types: [auto-rebuild]
+
 
 env:
   NOTION_SECRET:      ${{ secrets.NOTION_SECRET }}
