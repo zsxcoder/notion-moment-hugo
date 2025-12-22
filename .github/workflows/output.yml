@@ -1,11 +1,8 @@
 name: fetch content from Notion & deploy to Vercel
 
 on:
-  workflow_dispatch:          # 手动触发
-  push:                       # 每次 push 触发
-  schedule:
-    - cron: '3,13,23,33,43,53 * * * *'   # 每 10 分钟但错开整点
-
+  workflow_dispatch:
+  push:
 
 env:
   NOTION_SECRET:      ${{ secrets.NOTION_SECRET }}
@@ -16,56 +13,37 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-22.04
     steps:
-      # ---------- 1. 准备源码与工具 ----------
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      # ---------- 1. 一次性把源码、Python、Node 依赖全准备好 ----------
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
-      - name: Install notion-client
-        run: |
-          python -m pip install --upgrade pip
-          pip install notion-client==2.2.1
+          cache: 'pip'
+      - run: pip install notion-client==2.2.1
 
       # ---------- 2. 拉取解析器与主题 ----------
-      - name: Pull patched parser
-        run: git clone --branch master --depth 1 https://github.com/zsxcoder/notion-moments-database-parser.git ./scripts
-
-      - name: Pull theme
-        run: git clone --branch main  --depth 1 https://github.com/zsxcoder/notion-hugo-moments.git themes/moments
+      - name: Pull parser & theme
+        run: |
+          git clone --depth 1 https://github.com/zsxcoder/notion-moments-database-parser.git scripts
+          git clone --depth 1 https://github.com/zsxcoder/notion-hugo-moments.git themes/moments
 
       # ---------- 3. 生成 markdown ----------
-      - name: Generate markdown
-        run: python scripts/main.py
+      - run: python scripts/main.py
 
-      # ---------- 4. 安装 Hugo ----------
-      - name: Install Hugo CLI
-        run: |
-          wget -O ${{ runner.temp }}/hugo.deb \
-            https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.deb \
-          && sudo dpkg -i ${{ runner.temp }}/hugo.deb
-
-      - name: Install Dart Sass
-        run: sudo snap install dart-sass
-
-      # ---------- 5. 装 Node 依赖（可选） ----------
-      - name: Install Node deps
-        run: "[ -f package-lock.json ] && npm ci || true"
-
-      # ---------- 6. 构建静态站点 ----------
-      - name: Build
-        run: hugo --gc --minify --baseURL ${{ secrets.VERCEL_PROJECT_URL }}
-
-      # ---------- 7. 部署到 Vercel ----------
-      - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v25
+      # ---------- 4. 官方 Hugo Action（自带缓存、Sass、Extended） ----------
+      - uses: peaceiris/actions-hugo@v3
         with:
-          vercel-token:        ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id:       ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id:   ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory:   ./public
-          vercel-args: '--prod'
-          # 如果站点需要自定义域名，可以再加 vercel-args: '--prod'
+          hugo-version: ${{ env.HUGO_VERSION }}
+          extended: true
+
+      # ---------- 5. 构建 ----------
+      - run: hugo --gc --minify --baseURL ${{ secrets.VERCEL_PROJECT_URL }}
+
+      # ---------- 6. 部署 ----------
+      - uses: amondnet/vercel-action@v25
+        with:
+          vercel-token:      ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id:     ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: ./public
+          vercel-args:       '--prod'
